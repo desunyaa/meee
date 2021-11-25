@@ -31,6 +31,7 @@ struct Noun {
 	int alive;
 	int animate;
 	int base_cost;
+	int gold;
 	int damage;
 	int defense;
 	int main_quest;
@@ -44,17 +45,17 @@ struct Noun {
 
 
 void create_noun(struct Noun *subject, char* name, int def_happy, int id, int helf, int pos, char* gender, char* subject_pronoun, char* object_pronoun,char* description,
-	int base_cost,  int damage,  int defense);
+	int base_cost,  int damage,  int defense, int gold);
 
 
 void create_noun(struct Noun *subject, char* name, int def_happy, int id, int helf, int pos, char* gender, char* subject_pronoun, char* object_pronoun,char* description,
-	int base_cost,  int damage,  int defense)
+	int base_cost,  int damage,  int defense, int gold)
 {
 
 
 
 
-
+	subject->gold = gold;
 
 	strcpy( subject->name, name);
 	subject->happy = def_happy;
@@ -182,35 +183,54 @@ void examine_noun(struct Noun *subject , struct Noun *direct_object )
 }
 }
 
-void examine_room(struct Noun *subject , struct Room *direct_object );
-void examine_room(struct Noun *subject , struct Room *direct_object )
+void examine_room(struct Noun *subject , struct Room *direct_object, struct Noun * nouns,struct Room * rooms  );
+void examine_room(struct Noun *subject , struct Room *direct_object,struct Noun * nouns,struct Room * rooms  )
 {
+	
+	int i=0;
 	if(subject->position == direct_object->position){
 		printf(" %s \n",direct_object->description );
+		printf("connections: ");
+		for(i =0; (direct_object->travelable_rooms[i] != -2) && (i<MAX_TRAVELABLE_ROOMS); i++ ){
+		
+			printf(" '%s' ",rooms[direct_object->travelable_rooms[i]].name);
+		
+		
+		
+		}
+		printf("\n");
+		printf("contains: ");
+		for( i  = 1; (strcmp(nouns[i].name,"BUFFER NAME")); i = i + 1){
+
+			if((nouns[i].position == direct_object->position)){
+//            printf("nouns[jeep]->damage %d", nouns[jeep].damage);
+				printf(" '%s' ",nouns[i].name);
+
+
+			}
+
+
+		}
+		printf("\n");
 	}//else{printf("%s is not in the %s !\n", subject->name, direct_object->name);} removed cause of move merge
 
 
 }
 
-void move(struct Noun *subject , struct Room *direct_object,struct Room * rooms );
-void move(struct Noun *subject , struct Room *direct_object,struct Room * rooms )
+
+
+void move(struct Noun *subject , struct Room *direct_object  );
+void move(struct Noun *subject , struct Room *direct_object )
 {
 	int i=0;
-	for (i=0; i<MAX_TRAVELABLE_ROOMS; i++){
+	for (i=0; (direct_object->travelable_rooms[i] != -2) && (i<MAX_TRAVELABLE_ROOMS); i++){
 	//	printf("%d",i);
 	
 	if (subject->position == direct_object->travelable_rooms[i]){
 
 	printf("%s moves to the %s  .\n", subject->name, direct_object->name );
 	subject->position = direct_object->position;
-	printf("connections: ");
-	for(i =0; (direct_object->travelable_rooms[i] != -2) && (i<MAX_TRAVELABLE_ROOMS); i++ ){
-		
-		printf(" '%s' ",rooms[direct_object->travelable_rooms[i]].name);
-		
-		
-		
-	}
+	
 	
 
 	}}
@@ -220,23 +240,27 @@ void move(struct Noun *subject , struct Room *direct_object,struct Room * rooms 
 }
 
 
+void inventory(struct Noun *subject,struct Noun * nouns);
+void inventory(struct Noun *subject,struct Noun * nouns){
+	int jeep;
+	
+	printf("you have: ");
+	for( jeep  = 0; (strcmp(nouns[jeep].name,"BUFFER NAME")); jeep = jeep + 1){
+
+			if((nouns[jeep].owner_id == subject->noun_id)){
+//            printf("nouns[jeep]->damage %d", nouns[jeep].damage);
+				printf(" '%s' ",nouns[jeep].name);
 
 
-void give_noun(struct Noun *subject, struct Noun *direct_object, struct Noun *indirect_object);
-void give_noun(struct Noun *subject, struct Noun *direct_object, struct Noun *indirect_object)
-{
-
-	if((subject->position == indirect_object->position) && (direct_object->owner_id == subject->noun_id)){
-		printf("%s gives the %s to %s .\n", subject->name, direct_object->name, indirect_object->name);
-		direct_object->owner_id = indirect_object->noun_id;
-		direct_object->wielded = 0;
-		
-		
-
-	}else{printf("You have no %s to give to the %s !\n", direct_object->name, indirect_object->name);}
+			}
 
 
-
+		}
+		printf("\n");
+	
+	
+	
+	
 }
 
 
@@ -251,7 +275,7 @@ void take_noun(struct Noun *subject, struct Room *room, struct Noun *direct_obje
 		direct_object->position = -1;
 		
 
-	}else{printf("There is no %s in the %s !\n", direct_object->name, room->name);}
+	}
 
 
 
@@ -305,6 +329,80 @@ if((direct_object->wielded == 1) && (direct_object->owner_id == subject->owner_i
 
 
 }
+
+
+void give_noun(struct Noun *subject, struct Noun *direct_object, struct Noun *indirect_object);
+void give_noun(struct Noun *subject, struct Noun *direct_object, struct Noun *indirect_object)
+{
+
+	if((subject->position == indirect_object->position) && (direct_object->owner_id == subject->noun_id)){
+		printf("%s gives the %s to %s .\n", subject->name, direct_object->name, indirect_object->name);
+	///	printf("direct_object->name: %s, indirect_object->name: %s, direct_object->noun_id: %d,indirect_object->noun_id: %d,\n",  direct_object->name, indirect_object->name,direct_object->noun_id,indirect_object->noun_id);
+		direct_object->owner_id = indirect_object->noun_id;
+		direct_object->wielded = 0;
+		
+		
+
+	}
+
+
+
+}
+
+
+
+
+void buy(struct Noun *subject , struct Noun *direct_object, struct Noun *indirect_object);
+void buy(struct Noun *subject , struct Noun *direct_object, struct Noun *indirect_object){
+	
+	if((subject->position == indirect_object->position) && (subject->gold >= direct_object->base_cost) && (direct_object->owner_id == indirect_object->noun_id)){
+		
+		
+		printf("%s buys the %s from %s for %d gold.\n", subject->name, direct_object->name, indirect_object->name, direct_object->base_cost );
+		give_noun(indirect_object,direct_object,subject);
+		subject->gold = (subject->gold ) - (direct_object->base_cost);
+		indirect_object->gold = (indirect_object->gold ) + (direct_object->base_cost);
+		printf("%s now has %d gold . \n", subject->name, subject->gold);
+		printf("%s now has %d gold . \n", indirect_object->name, indirect_object->gold);
+		
+		
+
+	}///else{printf("You cannot buy that here \n");}
+		
+		
+		
+	
+	
+	
+	
+}
+
+
+void sell(struct Noun *subject , struct Noun *direct_object , struct Noun *indirect_object );
+void sell(struct Noun *subject , struct Noun *direct_object , struct Noun *indirect_object ){
+	
+	if((subject->position == indirect_object->position) && (indirect_object->gold >= direct_object->base_cost) && (direct_object->owner_id == subject->noun_id)){
+		
+		
+		printf("%s sells the %s to %s for %d gold.\n", subject->name, direct_object->name, indirect_object->name, direct_object->base_cost );
+		give_noun(subject,direct_object,indirect_object);
+		indirect_object->gold = (indirect_object->gold ) - (direct_object->base_cost);
+		subject->gold = (subject->gold) + (direct_object->base_cost);
+		printf("%s now has %d gold . \n", subject->name, subject->gold);
+		printf("%s now has %d gold . \n", indirect_object->name, indirect_object->gold);
+		
+		
+
+	}///else{printf("You cannot buy that here \n");}
+		
+		
+		
+	
+	
+	
+	
+}
+
 
 
 ///add defense
