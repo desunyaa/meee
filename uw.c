@@ -9,7 +9,7 @@
 
 
 
-void parse(struct Noun * nouns, struct Room * rooms,int gamerun,int time);
+void parse(struct Noun * nouns, struct Room * rooms, struct Conversation * conversations,int gamerun,int time);
 void removeStringTrailingNewline(char *str) ;
 
 
@@ -25,6 +25,7 @@ void main(void){
 
 	struct Noun nouns[MAX_NOUNS];
 	struct Room rooms[MAX_ROOMS];
+	struct Conversation conversations[MAX_CONVERSATIONS];
 
 
 
@@ -46,13 +47,19 @@ void main(void){
 
 	int filler = 0;
 	for( filler = 0; (filler < MAX_NOUNS) ; filler++ ){
-		create_noun(&nouns[filler], "BUFFER NAME", 90, 2, 10, 0, "BUFFER GENDER", "BUFFER S", "BUFFER S", "BUFFER S", 100,  5,  1,999);
+		create_noun(&nouns[filler], "BUFFER NAME", 99, 992, 910, 90, "BUFFER GENDER", "BUFFER S", "BUFFER S", "BUFFER S", 9100,  95,  991,999);
 
 
 	}
 
 	for( filler = 0; (filler < MAX_ROOMS) ; filler++ ){
 		create_room(&rooms[filler], "BUFFER NAME", "BUFFER DESCRIPTION", 999, basement_connections );
+
+
+	}
+	
+	for( filler = 0; (filler < MAX_CONVERSATIONS) ; filler++ ){
+		create_conversation(&conversations[filler], 999, GOD_ID, "BUFFER QUESTION", "BUFFER ANSWER", 999 ,0 );
 
 
 	}
@@ -83,7 +90,7 @@ void main(void){
 	create_noun(&nouns[3], "katana", 90, 3, 0, 2, "n", "it", "it",  "fine sword", 10,  27,  1,0);
 	create_noun(&nouns[4], "kimono", 90, 4, 0, 2, "n", "it", "it", "traditional silk dress", 9,  5,  1,0);
 	create_noun(&nouns[5], "terry", 90, 5, 10, 1, "m", "he", "him", "holy c", 1000,  50,  1000,0);
-	create_noun(&nouns[6], "seller", 90, 6, 10, 5, "m", "he", "him", "an honest merchant", 1000,  17,  13,100);
+	create_noun(&nouns[6], "seller", 90, 6, 10, 5, "f", "she", "her", "a little girl posing as a merchant. she has an eyepatch and hood covering her hair.", 1000,  17,  13,100);
 	create_noun(&nouns[7], "shemagh", 90, 7, 10, 5, "n", "it", "it", "a quality piece of cloth", 3, 0,  2,0);
 	take_noun( &nouns[0], &rooms[nouns[0].position], &nouns[7]);
 	create_noun(&nouns[8], "dagger", 90, 8, 10, 5, "n", "it", "it", "a small yet dangerous blade", 5, 2,  2,0);
@@ -92,6 +99,14 @@ void main(void){
 	take_noun( &nouns[6], &rooms[nouns[0].position], &nouns[9]);
 
 
+
+
+
+
+
+	create_conversation(&conversations[0], 0,6, "trading", "looking to trade are you? better not steal anything... ", 1,1  );
+	create_conversation(&conversations[1], 1,6, "weather", "pretty stormy today, wouldn't want to be the one setting out this afternoon ", 0 ,0 );
+	create_conversation(&conversations[2],2,6, "leave", "bye bye !", 0,1);
 
 
 
@@ -134,7 +149,7 @@ void main(void){
 
 		time++;
 
-		parse(nouns, rooms, gamerun,time);
+		parse(nouns, rooms,conversations, gamerun,time);
 
 
 
@@ -142,7 +157,7 @@ void main(void){
 	}}
 
 
-	void parse(struct Noun * nouns, struct Room * rooms,int gamerun,int time){
+	void parse(struct Noun * nouns, struct Room * rooms, struct Conversation * conversations, int gamerun,int time){
 		
 
 
@@ -179,7 +194,7 @@ void main(void){
 
 	
 
-		static const char *verbs[] = { "pat", "tickle", "kill", "dev", "examine", "go", "take", "drop", "wield", "unwield", "attack", "give", "move", "wear", "inventory", "buy", "sell", "BUFFER NAME"};
+		static const char *verbs[] = { "pat", "tickle", "kill", "dev", "examine", "go", "take", "drop", "wield", "unwield", "attack", "give", "move", "wear", "inventory", "buy", "sell", "talk", "BUFFER NAME"};
 		static const char *prepositions[] = { "to", "from", "BUFFER NAME" };
 
 
@@ -335,7 +350,7 @@ if (preposition_parse == 0){
 
 				}prepositioned_noun--;
 				
-	printf("AAAA %s SET AS SECOND NOUN \n %s SET AS FIRST NOUN  \n  %s SET AS PREPOSITIONED\n\n",nouns[second_noun].name, nouns[first_noun].name, nouns[prepositioned_noun].name);
+	///printf("AAAA %s SET AS SECOND NOUN \n %s SET AS FIRST NOUN  \n  %s SET AS PREPOSITIONED\n\n",nouns[second_noun].name, nouns[first_noun].name, nouns[prepositioned_noun].name);
 	
 	
 	
@@ -391,7 +406,7 @@ if( !noun2_parse){direct_object_noun=first_noun; indirect_object_noun=second_nou
 			   
 				
 				
-	printf("BBB %s SET AS DIRECT OBJECT NOUN \n %s SET AS INDIRECT OBJECT NOUN  \n  %s SET AS PREPOSITIONED\n\n",nouns[direct_object_noun].name, nouns[indirect_object_noun].name, nouns[prepositioned_noun].name);				
+///printf("BBB %s SET AS DIRECT OBJECT NOUN \n %s SET AS INDIRECT OBJECT NOUN  \n  %s SET AS PREPOSITIONED\n\n",nouns[direct_object_noun].name, nouns[indirect_object_noun].name, nouns[prepositioned_noun].name);				
 
 
 		 
@@ -439,7 +454,7 @@ if( !noun2_parse){direct_object_noun=first_noun; indirect_object_noun=second_nou
 
 	if ( room_noun_parse){//printf("WAHTTHEHECK %d %d %s",room_object, verb, verbs[verb] );
 
-				if (((strcmp(verbs[verb], "examine"))==0) && room_noun_parse){
+				if ((!(strcmp(verbs[verb], "examine"))) && room_noun_parse){
 					examine_room(&nouns[0], &rooms[room_object], nouns,rooms);
 		 //           printf("Tss ~\n");
 
@@ -467,18 +482,23 @@ if( !noun2_parse){direct_object_noun=first_noun; indirect_object_noun=second_nou
 ////	static const char *verbs[] = { " pat", " tickle", " kill", " dev", " examine", " go", " take", " drop", " wield", " unwield", " attack", "BUFFER NAME", ""};
 				if (!noun1_parse ){
 
-					if ((strcmp(verbs[verb], "pat"))==0){
+					if (!(strcmp(verbs[verb], "pat"))){
 						headpat(&nouns[0], &nouns[first_noun]);
 
 
 					}
+					if (!(strcmp(verbs[verb], "talk"))){
+						talk(&nouns[0], &nouns[first_noun],conversations, nouns);
 
-					if ((strcmp(verbs[verb], "kill"))==0){
+
+					}
+
+					if (!(strcmp(verbs[verb], "kill"))){
 						printf("You kill the loli . Fun .\n");
 						gamerun = 0;
 					}
 
-					if ((strcmp(verbs[verb], "dev"))==0){
+					if (!(strcmp(verbs[verb], "dev"))){
 						printf("happy = %i, verbs[1] = %s, \n",nouns[1].happy, verbs[1]);
 						printf("nouns[second_noun].name = %s, \n",nouns[second_noun].name);
 						printf(" rooms[0].name %s rooms[0].description %s ! rooms[0].travelable_rooms[1] %d  .\n", rooms[0].name, rooms[0].description, rooms[0].travelable_rooms[1] );
@@ -486,7 +506,7 @@ if( !noun2_parse){direct_object_noun=first_noun; indirect_object_noun=second_nou
 
 					}
 
-					if ((strcmp(verbs[verb], "examine")==0)&& noun2_parse){
+					if (!(strcmp(verbs[verb], "examine"))&& noun2_parse){
 						examine_noun(&nouns[0], &nouns[first_noun]);
 
 					}
@@ -495,13 +515,13 @@ if( !noun2_parse){direct_object_noun=first_noun; indirect_object_noun=second_nou
 
 					
 
-					if ((strcmp(verbs[verb], "take"))==0){
+					if (!(strcmp(verbs[verb], "take"))){
 						
 						take_noun( &nouns[0], &rooms[nouns[0].position], &nouns[first_noun]);
 
 					}
 
-					if ((strcmp(verbs[verb], "drop"))==0){
+					if (!(strcmp(verbs[verb], "drop"))){
 
 						drop_noun( &nouns[0], &rooms[nouns[0].position], &nouns[first_noun]);
 
@@ -511,19 +531,19 @@ if( !noun2_parse){direct_object_noun=first_noun; indirect_object_noun=second_nou
 						wield_noun( &nouns[0],  &nouns[first_noun]);
 
 					}
-					if ((strcmp(verbs[verb], "unwield"))==0){
+					if (!(strcmp(verbs[verb], "unwield"))){
 
 						unwield_noun( &nouns[0],  &nouns[first_noun]);
 
 					}
 
-					if ((strcmp(verbs[verb], "attack"))==0){
+					if (!(strcmp(verbs[verb], "attack"))){
 
 						attack(&nouns[0], &nouns[first_noun], nouns);
 
 					}
 
-					if ((strcmp(verbs[verb], "give"))==0){
+					if (!(strcmp(verbs[verb], "give"))){
 
 						give_noun(&nouns[0], &nouns[direct_object_noun], &nouns[indirect_object_noun]);
 

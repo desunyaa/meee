@@ -4,9 +4,46 @@
 #define MAX_ROOMS 10
 #define MAX_VERBS 20
 #define MAX_NOUNS 20
+#define MAX_CONVERSATIONS 20
 #define GOD_ID 9999
 
 
+
+struct Conversation {
+	
+	int id;
+	char question[50];
+	char answer[500];
+	int show_inventory;
+	int leave_phrase;
+	int owner_id;
+	
+	
+	
+};
+
+
+
+void create_conversation(struct Conversation *conversation, int id, int owner_id, char* question,char* answer, int show_inventory, int leave_phrase);
+
+void create_conversation(struct Conversation *conversation, int id, int owner_id, char* question,char* answer, int show_inventory, int leave_phrase)
+
+{
+
+	
+	
+
+
+
+	strcpy( conversation->question, question);
+	strcpy( conversation->answer, answer);
+	conversation->id=id;
+	conversation->show_inventory=show_inventory;
+	conversation->owner_id=owner_id;
+	conversation->leave_phrase = leave_phrase;
+	
+
+}
 
 
 
@@ -149,6 +186,11 @@ void create_room(struct Room *room, char*  name,char* description, int position,
 
 
 
+
+
+
+
+
 void headpat(struct Noun *subject , struct Noun *direct_object );
 void headpat(struct Noun *subject , struct Noun *direct_object )
 {
@@ -244,7 +286,7 @@ void inventory(struct Noun *subject,struct Noun * nouns);
 void inventory(struct Noun *subject,struct Noun * nouns){
 	int jeep;
 	
-	printf("you have: ");
+	printf("\n %s has: ", subject->name);
 	for( jeep  = 0; (strcmp(nouns[jeep].name,"BUFFER NAME")); jeep = jeep + 1){
 
 			if((nouns[jeep].owner_id == subject->noun_id)){
@@ -434,4 +476,90 @@ void attack(struct Noun *subject, struct Noun *direct_object,struct Noun * nouns
 
 
 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+void talk(struct Noun *subject , struct Noun *direct_object ,struct Conversation * conversations, struct Noun * nouns);
+void talk(struct Noun *subject , struct Noun *direct_object ,struct Conversation * conversations, struct Noun * nouns){
+	
+	
+	
+	int jeep;
+	
+	int leave = 0;
+
+	if(subject->position == direct_object->position){
+		
+		printf("%s greets %s\n",subject->name,direct_object->name);
+		printf("What would you like to talk about?\n");
+		
+		
+		
+		printf("TOPICS: ");
+		
+		
+		for( jeep  = 0; (strcmp(conversations[jeep].question,"BUFFER QUESTION")); jeep = jeep + 1){
+
+			if((conversations[jeep].owner_id == direct_object->noun_id) ){
+            printf(" %s ,",  conversations[jeep].question);
+				
+
+
+			}
+
+
+		}
+		
+		while(!leave){
+			
+			char talk_string[MAX_STR_SZ];
+	char string_to_parse[MAX_STR_SZ];
+	int talk_object = 0;
+	char *talk_noun_parse =  0;
+		
+		printf("\n\n>>>> ");
+
+		fgets(talk_string, MAX_STR_SZ, stdin);
+		strcpy(string_to_parse, " ");
+
+		strcat(string_to_parse, talk_string);
+		
+		
+			for( talk_object = 0; (strcmp(conversations[talk_object].question, "BUFFER NAME") && !talk_noun_parse); talk_object = talk_object + 1 ){
+				
+				talk_noun_parse = strstr(string_to_parse, conversations[talk_object].question);
+	//			printf("room_object = %d",room_object);
+				
+
+
+
+			}talk_object--; ///for second_noun end
+			
+			
+			if(talk_noun_parse){
+				
+				printf("\n %s: %s\n",direct_object->name,conversations[talk_object].answer);
+				if(conversations[talk_object].show_inventory){inventory(&nouns[direct_object->noun_id],nouns);}
+				if(conversations[talk_object].leave_phrase){leave = 1;}
+				
+				
+				
+			}
+	
+
+	}
+	
+	}
+	
+	
 }
